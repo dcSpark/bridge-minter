@@ -56,3 +56,5 @@ executable bridge-sc
     , cardano-api
     , bridge-minter
     , optparse-generic
+    , plutus-ledger-api
+    , plutus-tx

@@ -17,8 +17,12 @@ import qualified Data.ByteString.Lazy as BSL
 import           PlutusTx
 import           PlutusTx.Prelude hiding (Semigroup (..), unless)
 
-data Action = A_Mint | A_Burn
+data Action = A_Mint TokenName | A_Burn
 data BridgeConfig = BridgeConfig
+  { bcErc721Id               :: BuiltinByteString
+  , bcPermissionNftPolicyId  :: CurrencySymbol
+  , bcPermissionNftTokenName :: TokenName
+  }
 
 unstableMakeIsData ''Action
 makeLift ''BridgeConfig
@@ -26,7 +30,7 @@ makeLift ''BridgeConfig
 mkPolicy :: BridgeConfig -> Action -> ScriptContext -> Bool
 mkPolicy BridgeConfig {} action ScriptContext {} = case action of
   A_Burn -> error ()
-  A_Mint -> error ()
+  A_Mint _ -> error ()
 
 -------------------------------------------------------------------------------
 -- Entry Points
