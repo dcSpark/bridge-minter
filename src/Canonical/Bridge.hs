@@ -6,31 +6,104 @@ import           Cardano.Api.Shelley (PlutusScript (..), PlutusScriptV2)
 import           Codec.Serialise
 import qualified Data.ByteString.Lazy as LB
 import qualified Data.ByteString.Short as SBS
-import           Plutus.V2.Ledger.Contexts
 import           Plutus.V1.Ledger.Scripts
--- import           Plutus.V1.Ledger.Crypto
--- import           Plutus.V2.Ledger.Tx
 import           Plutus.V1.Ledger.Value
 import qualified Cardano.Api.Shelley as Shelly
 import qualified Data.ByteString.Short as BSS
 import qualified Data.ByteString.Lazy as BSL
 import           PlutusTx
 import           PlutusTx.Prelude hiding (Semigroup (..), unless)
+import qualified PlutusTx.AssocMap as M
 
-data Action = A_Mint TokenName | A_Burn
+data Action = A_Mint [TokenName] | A_Burn
+
 data BridgeConfig = BridgeConfig
   { bcErc721Id               :: BuiltinByteString
   , bcPermissionNftPolicyId  :: CurrencySymbol
   , bcPermissionNftTokenName :: TokenName
   }
 
+data BridgeTxOut = BridgeTxOut
+  { bTxOutAddress         :: BuiltinData
+  , bTxOutValue           :: Value
+  , bTxOutDatum           :: BuiltinData
+  , bTxOutReferenceScript :: BuiltinData
+  }
+
+data BridgeTxInInfo = BridgeTxInInfo
+  { bTxInInfoOutRef           :: BuiltinData
+  , bTxInInfoResolved         :: BridgeTxOut
+  }
+
+data BridgeTxInfo = BridgeTxInfo
+  { bTxInfoInputs             :: [BridgeTxInInfo]
+  , bTxInfoReferenceInputs    :: BuiltinData
+  , bTxInfoOutputs            :: BuiltinData
+  , bTxInfoFee                :: BuiltinData
+  , bTxInfoMint               :: Value
+  , bTxInfoDCert              :: BuiltinData
+  , bTxInfoWdrl               :: BuiltinData
+  , bTxInfoValidRange         :: BuiltinData
+  , bTxInfoSignatories        :: BuiltinData
+  , bTxInfoRedeemers          :: BuiltinData
+  , bTxInfoData               :: BuiltinData
+  , bTxInfoId                 :: BuiltinData
+  }
+
+data BridgeScriptPurpose
+    = BMinting CurrencySymbol
+
+data BridgeScriptContext = BridgeScriptContext
+  { bScriptContextTxInfo  :: BridgeTxInfo
+  , bScriptContextPurpose :: BridgeScriptPurpose
+  }
+
+unstableMakeIsData ''BridgeTxOut
+unstableMakeIsData ''BridgeTxInInfo
+unstableMakeIsData ''BridgeTxInfo
+unstableMakeIsData ''BridgeScriptPurpose
+unstableMakeIsData ''BridgeScriptContext
 unstableMakeIsData ''Action
 makeLift ''BridgeConfig
 
-mkPolicy :: BridgeConfig -> Action -> ScriptContext -> Bool
-mkPolicy BridgeConfig {} action ScriptContext {} = case action of
-  A_Burn -> error ()
-  A_Mint _ -> error ()
+-- TODO
+-- write helper for testing if NFT is being spent
+hasPermissionNft :: CurrencySymbol -> TokenName -> BridgeTxInInfo -> Bool
+hasPermissionNft = error ()
+
+-- Verify that only 1 token is minted for each token name
+mkPolicy :: BridgeConfig -> Action -> BridgeScriptContext -> Bool
+mkPolicy BridgeConfig {..} action BridgeScriptContext
+  { bScriptContextTxInfo = BridgeTxInfo {..}
+  , bScriptContextPurpose = BMinting theCurrencySymbol
+  } =
+  let
+    hasNft :: Bool
+    !hasNft = case filter (hasPermissionNft bcPermissionNftPolicyId bcPermissionNftTokenName) bTxInfoInputs of
+      [] -> traceError "No permission nft"
+      [_] -> True
+      _ -> traceError "Impossible. Multiple permission nfts"
+
+  in hasNft
+  && case action of
+    A_Burn ->
+      let
+        counts :: [Integer]
+        !counts = case M.lookup theCurrencySymbol (getValue bTxInfoMint) of
+          Nothing -> traceError "Impossible!"
+          Just m  -> map snd (M.toList m)
+
+        allCountsLessThanZero :: Bool
+        !allCountsLessThanZero = all (<0) counts
+
+      in traceIfFalse "Burning but some counts are greater than zero" allCountsLessThanZero
+
+    A_Mint _ ->
+      let
+        correctAmountIsMinted :: Bool
+        !correctAmountIsMinted = error ()
+
+      in correctAmountIsMinted
 
 -------------------------------------------------------------------------------
 -- Entry Points
