@@ -29,7 +29,7 @@ cardano-cli transaction build \
     $BLOCKCHAIN \
     $(cardano-cli-balance-fixer input --address $minterAddress $BLOCKCHAIN) \
     --tx-in-collateral $(cardano-cli-balance-fixer collateral --address $minterAddress $BLOCKCHAIN) \
-    --tx-out "$minterAddress + 2137884 lovelace $extraOutput" \
+    --tx-out "$minterAddress + 2137884 lovelace + $mintValue $extraOutput" \
     --change-address $minterAddress \
     --protocol-params-file scripts/$BLOCKCHAIN_PREFIX/protocol-parameters.json \
     --mint "$mintValue" \
