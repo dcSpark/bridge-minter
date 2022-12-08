@@ -23,6 +23,7 @@ common lang
     CPP
     LambdaCase
     DeriveGeneric
+    TupleSections
 
   ghc-options:
     -Wall -Wcompat -Wincomplete-record-updates
