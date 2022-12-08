@@ -67,10 +67,9 @@ unstableMakeIsData ''BridgeScriptContext
 unstableMakeIsData ''Action
 makeLift ''BridgeConfig
 
--- TODO
--- write helper for testing if NFT is being spent
 hasPermissionNft :: CurrencySymbol -> TokenName -> BridgeTxInInfo -> Bool
-hasPermissionNft = error ()
+hasPermissionNft c t BridgeTxInInfo { bTxInInfoResolved = BridgeTxOut {..}} =
+  valueOf bTxOutValue c t == 1
 
 -- Verify that only 1 token is minted for each token name
 mkPolicy :: BridgeConfig -> Action -> BridgeScriptContext -> Bool
