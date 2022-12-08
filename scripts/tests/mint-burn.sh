@@ -19,3 +19,7 @@ $baseDir/minting/mint-0-policy.sh
 $baseDir/wait/until-next-block.sh
 
 $baseDir/happy-path/mint.sh
+$baseDir/wait/until-next-block.sh
+
+$baseDir/happy-path/burn.sh
+$baseDir/wait/until-next-block.sh
