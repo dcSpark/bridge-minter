@@ -9,6 +9,7 @@ mkdir -p $tempDir
 minterAddress=$1
 signingKey=$2
 bridgeMinterRedeemer=$3
+tokenName=$4
 
 bodyFile=$tempDir/sell-tx-body.01
 outFile=$tempDir/sell-tx.01
@@ -22,7 +23,7 @@ if [ "$changeOutput" != "" ];then
   extraOutput="+ $changeOutput"
 fi
 
-mintValue="1 $bridgeMinterId.1234"
+mintValue="1 $bridgeMinterId.$tokenName"
 
 cardano-cli transaction build \
     --babbage-era \

@@ -1,8 +1,5 @@
 {
   "constructor": 0,
   "fields": [
-    {"list" : [
-      { "bytes": "1234" }
-    ]}
   ]
 }

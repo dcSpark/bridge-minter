@@ -6,7 +6,7 @@ tempDir=$baseDir/../temp
 
 detected=false
 
-"$baseDir/happy-path/mint.sh" || {
+"$baseDir/happy-path/mint-1.sh" || {
     detected=true
 }
 
@@ -18,7 +18,7 @@ fi
 $baseDir/minting/mint-0-policy.sh
 $baseDir/wait/until-next-block.sh
 
-$baseDir/happy-path/mint.sh
+$baseDir/happy-path/mint-1.sh
 $baseDir/wait/until-next-block.sh
 
 $baseDir/happy-path/burn.sh

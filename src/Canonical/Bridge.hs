@@ -14,9 +14,8 @@ import qualified Data.ByteString.Lazy as BSL
 import           PlutusTx
 import           PlutusTx.Prelude hiding (Semigroup (..), unless)
 import qualified PlutusTx.AssocMap as M
-import           PlutusTx.AssocMap (Map)
 
-data Action = A_Mint [TokenName] | A_Burn
+data Action = A_Mint | A_Burn
 
 data BridgeConfig = BridgeConfig
   { bcErc721Id               :: BuiltinByteString
@@ -98,17 +97,14 @@ mkPolicy BridgeConfig {..} action BridgeScriptContext
 
       in traceIfFalse "Burning but some counts are greater than zero" allCountsLessThanZero
 
-    A_Mint tokenNames ->
+    A_Mint ->
       let
-        expectedTokenMap :: Map TokenName Integer
-        expectedTokenMap = M.fromList (map (,1) tokenNames)
-
         correctAmountIsMinted :: Bool
         !correctAmountIsMinted = case M.lookup theCurrencySymbol (getValue bTxInfoMint) of
           Nothing -> traceError "Impossible!"
-          Just m  -> m == expectedTokenMap
+          Just m  -> all ((==1) . snd) (M.toList m)
 
-      in correctAmountIsMinted
+      in traceIfFalse "All minted token counts are not 1" correctAmountIsMinted
 
 -------------------------------------------------------------------------------
 -- Entry Points
