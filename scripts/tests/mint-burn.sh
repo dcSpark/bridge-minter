@@ -32,5 +32,14 @@ fi
 $baseDir/happy-path/mint-1.sh
 $baseDir/wait/until-next-block.sh
 
+"$baseDir/failure-cases/burn-bad-count.sh" || {
+    detected=true
+}
+
+if [ $detected == false ]; then
+  echo "Failed to prevent bad count minting"
+  exit 1
+fi
+
 $baseDir/happy-path/burn.sh
 $baseDir/wait/until-next-block.sh
