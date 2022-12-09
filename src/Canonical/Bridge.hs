@@ -14,6 +14,7 @@ import qualified Data.ByteString.Lazy as BSL
 import           PlutusTx
 import           PlutusTx.Prelude hiding (Semigroup (..), unless)
 import qualified PlutusTx.AssocMap as M
+import qualified Plutonomy
 
 data Action = A_Mint | A_Burn
 
@@ -131,12 +132,19 @@ toCardanoApiScript
   . BSL.toStrict
   . serialise
 
+optimizerSettings :: Plutonomy.OptimizerOptions
+optimizerSettings = Plutonomy.defaultOptimizerOptions
+  { Plutonomy.ooSplitDelay     = False
+  , Plutonomy.ooFloatOutLambda = False
+  }
+
 mintingPolicyHash :: MintingPolicy -> MintingPolicyHash
 mintingPolicyHash
   = MintingPolicyHash
   . getScriptHash
   . scriptHash
   . getValidator
+  . Plutonomy.optimizeUPLCWith optimizerSettings
   . Validator
   . getMintingPolicy
 
@@ -156,7 +164,7 @@ bridgePolicyId :: BridgeConfig -> CurrencySymbol
 bridgePolicyId = mpsSymbol . mintingPolicyHash . policy
 
 scriptAsCbor :: BridgeConfig -> LB.ByteString
-scriptAsCbor = serialise . validator
+scriptAsCbor = serialise . Plutonomy.optimizeUPLCWith optimizerSettings . validator
 
 bridge :: BridgeConfig -> PlutusScript PlutusScriptV2
 bridge
