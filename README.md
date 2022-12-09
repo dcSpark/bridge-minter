@@ -2,6 +2,13 @@
 
 # Usage
 
+This contract is meant to create a unique minting and burning contract for every
+ERC721 smart contract that is bridged to the Cardano blockchain.
+
+The ERC721 id is used to configure the smart contract, along with a "permission NFT" policy id and token name. Using the ERC721 id as part of the configuration ensures the policy id for the NFTs are unique. The permission NFT is required to be spent in either the minting or burning transaction.
+
+Multiple NFTs can be minted or burned in a transaction. However, to ensure that NFTs are minted, only one token for each token name can be minted in a transactions.
+
 # Assets
 
 The compiled Plutus script is checked in to the following location:
