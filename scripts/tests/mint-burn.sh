@@ -41,5 +41,11 @@ if [ $detected == false ]; then
   exit 1
 fi
 
-$baseDir/happy-path/burn.sh
+$baseDir/happy-path/burn-1.sh
+$baseDir/wait/until-next-block.sh
+
+$baseDir/happy-path/mint-2.sh
+$baseDir/wait/until-next-block.sh
+
+$baseDir/happy-path/burn-2.sh
 $baseDir/wait/until-next-block.sh
