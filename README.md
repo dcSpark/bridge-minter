@@ -1,4 +1,4 @@
-# Updateable Multisig Contract
+# Plutus Minting & Burning Contract
 
 # Usage
 
